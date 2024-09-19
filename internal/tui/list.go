@@ -46,11 +46,11 @@ var (
 
 type QueryChangeMsg string
 
-func NewList(items ...sunbeam.ListItem) *List {
+func NewList(title string, items ...sunbeam.ListItem) *List {
 	filter := NewFilter()
 	filter.DrawLines = true
 
-	statusBar := NewStatusBar()
+	statusBar := NewStatusBar(title)
 
 	input := textinput.New()
 	input.Prompt = ""

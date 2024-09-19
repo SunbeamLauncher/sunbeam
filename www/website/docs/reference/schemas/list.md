@@ -2,6 +2,7 @@
 
 ```json
 {
+    "type": "list",
     // the list of items to display (optional)
     "items": [
         {

@@ -11,7 +11,7 @@ func NewErrorPage(err error, additionalActions ...sunbeam.ActionItem) *Detail {
 	})
 	actions = append(actions, additionalActions...)
 
-	detail := NewDetail(err.Error(), actions...)
+	detail := NewDetail("Error", err.Error(), actions...)
 
 	return detail
 }

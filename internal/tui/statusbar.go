@@ -18,6 +18,7 @@ func separator(n int) string {
 }
 
 type StatusBar struct {
+	title string
 	Width int
 
 	notification string
@@ -34,8 +35,9 @@ type ShowNotificationMsg struct {
 
 type HideNotificationMsg struct{}
 
-func NewStatusBar(actions ...sunbeam.ActionItem) StatusBar {
+func NewStatusBar(title string, actions ...sunbeam.ActionItem) StatusBar {
 	return StatusBar{
+		title:    title,
 		actions:  actions,
 		filtered: actions,
 	}
@@ -226,9 +228,8 @@ func (c StatusBar) View() string {
 	if c.expanded {
 		statusbar = fmt.Sprintf("   %s ", accessory)
 	} else {
-
-		blanks := strings.Repeat(" ", max(c.Width-lipgloss.Width(accessory)-lipgloss.Width(c.notification)-4, 0))
-		statusbar = fmt.Sprintf("   %s%s%s ", lipgloss.NewStyle().Faint(true).Render(c.notification), blanks, accessory)
+		blanks := strings.Repeat(" ", max(c.Width-lipgloss.Width(accessory)-lipgloss.Width(c.notification)-4-len(c.title), 0))
+		statusbar = fmt.Sprintf(" %s  %s%s%s ", c.title, lipgloss.NewStyle().Faint(true).Render(c.notification), blanks, accessory)
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Left, separator(c.Width), statusbar)

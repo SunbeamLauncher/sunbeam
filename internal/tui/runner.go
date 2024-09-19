@@ -28,7 +28,7 @@ type Runner struct {
 type ReloadMsg struct{}
 
 func NewRunner(execPath string, args ...string) *Runner {
-	detail := NewDetail("")
+	detail := NewDetail("Loading...", "")
 	detail.isLoading = true
 	return &Runner{
 		embed:    detail,
@@ -101,7 +101,7 @@ func (me *Runner) handlePage(page sunbeam.Page) tea.Cmd {
 			return embed.Init()
 		}
 
-		embed := NewList(list.Items...)
+		embed := NewList(page.Title, list.Items...)
 		embed.SetEmptyText(list.EmptyText)
 		embed.SetActions(list.Actions...)
 		embed.SetShowDetail(list.ShowDetail)
@@ -118,7 +118,7 @@ func (me *Runner) handlePage(page sunbeam.Page) tea.Cmd {
 	case sunbeam.PageTypeDetail:
 		detail := page.Detail
 		if detail.Markdown != "" {
-			detail := NewDetail(detail.Markdown, detail.Actions...)
+			detail := NewDetail(page.Title, detail.Markdown, detail.Actions...)
 			detail.Markdown = true
 			detail.SetSize(me.width, me.height)
 			me.embed = detail
@@ -126,7 +126,7 @@ func (me *Runner) handlePage(page sunbeam.Page) tea.Cmd {
 			return me.embed.Init()
 		}
 
-		me.embed = NewDetail(detail.Text, detail.Actions...)
+		me.embed = NewDetail(page.Title, detail.Text, detail.Actions...)
 		me.embed.SetSize(me.width, me.height)
 		return me.embed.Init()
 	case sunbeam.PageTypeForm:
@@ -182,8 +182,8 @@ func (me *Runner) handleAction(action sunbeam.ActionItem) tea.Cmd {
 
 			return ReloadMsg{}
 		case sunbeam.ActionTypePush:
-			runner := NewRunner(me.execPath, action.Run.Args...)
-			return PushPageCmd(runner)
+			runner := NewRunner(me.execPath, action.Push.Args...)
+			return PushPageMsg{runner}
 		case sunbeam.ActionTypeOpen:
 			if action.Open.Url != "" {
 				if err := utils.Open(action.Open.Url); err != nil {

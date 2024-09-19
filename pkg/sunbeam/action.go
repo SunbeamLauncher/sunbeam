@@ -41,10 +41,12 @@ func (a *ActionItem) UnmarshalJSON(data []byte) error {
 		return json.Unmarshal(data, &a.Open)
 	case ActionTypeReload:
 		return json.Unmarshal(data, &a.Reload)
+	case ActionTypePush:
+		return json.Unmarshal(data, &a.Push)
 	case ActionTypeExit:
 		return nil
 	default:
-		return fmt.Errorf("unsupported page type: %s", aux.Type)
+		return fmt.Errorf("unsupported action type: %s", aux.Type)
 	}
 
 }
@@ -58,7 +60,7 @@ type RunAction struct {
 }
 
 type PushAction struct {
-	Path string `json:"path,omitempty"`
+	Args []string `json:"args,omitempty"`
 }
 
 type CopyAction struct {

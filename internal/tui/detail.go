@@ -46,11 +46,11 @@ func AnsiStyle() ansi.StyleConfig {
 	return style
 }
 
-func NewDetail(text string, actions ...sunbeam.ActionItem) *Detail {
+func NewDetail(title string, text string, actions ...sunbeam.ActionItem) *Detail {
 	viewport := viewport.New(0, 0)
 	viewport.Style = lipgloss.NewStyle()
 
-	statusBar := NewStatusBar(actions...)
+	statusBar := NewStatusBar(title, actions...)
 	input := textinput.New()
 	input.PlaceholderStyle = lipgloss.NewStyle().Faint(true)
 	input.Prompt = ""

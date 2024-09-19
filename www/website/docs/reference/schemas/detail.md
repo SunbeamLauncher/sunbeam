@@ -2,6 +2,7 @@
 
 ```json
 {
+    "type": "detail",
     // the text to display (required)
     "text": "# Sunbeam\n\n***the love child of raycast and fzf***",
     // Format to use (optional, default: "ansi")

@@ -90,10 +90,6 @@ export default defineConfig({
             ],
           },
           {
-            text: "Publishing",
-            link: "/docs/developer-guide/publishing",
-          },
-          {
             text: "Tips",
             link: "/docs/developer-guide/tips",
           },
@@ -103,38 +99,16 @@ export default defineConfig({
         text: "Reference",
         items: [
           {
-            text: "Configuration",
-            link: "/docs/reference/config",
+            text: "List",
+            link: "/docs/reference/schemas/list",
           },
           {
-            text: "Schemas",
-            collapsed: true,
-            items: [
-              {
-                text: "Manifest",
-                link: "/docs/reference/schemas/manifest",
-              },
-              {
-                text: "Payload",
-                link: "/docs/reference/schemas/payload",
-              },
-              {
-                text: "List",
-                link: "/docs/reference/schemas/list",
-              },
-              {
-                text: "Detail",
-                link: "/docs/reference/schemas/detail",
-              },
-              {
-                text: "Action",
-                link: "/docs/reference/schemas/action",
-              },
-            ],
+            text: "Detail",
+            link: "/docs/reference/schemas/detail",
           },
           {
-            text: "CLI",
-            link: "/docs/reference/cli",
+            text: "Action",
+            link: "/docs/reference/schemas/action",
           },
         ],
       },

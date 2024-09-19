@@ -6,7 +6,8 @@ import (
 )
 
 type Page struct {
-	Type PageType `json:"type,omitempty"`
+	Type  PageType `json:"type,omitempty"`
+	Title string   `json:"title,omitempty"`
 
 	List   List   `json:"list,omitempty"`
 	Detail Detail `json:"detail,omitempty"`
@@ -15,7 +16,8 @@ type Page struct {
 
 func (p *Page) UnmarshalJSON(data []byte) error {
 	var aux struct {
-		Type PageType `json:"type,omitempty"`
+		Type  PageType `json:"type,omitempty"`
+		Title string   `json:"title,omitempty"`
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
@@ -23,6 +25,7 @@ func (p *Page) UnmarshalJSON(data []byte) error {
 	}
 
 	p.Type = aux.Type
+	p.Title = aux.Title
 	switch aux.Type {
 	case PageTypeList:
 		return json.Unmarshal(data, &p.List)
