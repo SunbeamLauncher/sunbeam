@@ -16,6 +16,7 @@ import (
 
 type Runner struct {
 	embed         Page
+	err           Page
 	width, height int
 	cancel        context.CancelFunc
 
@@ -69,6 +70,10 @@ func (c *Runner) SetSize(w int, h int) {
 	c.width = w
 	c.height = h
 
+	if c.err != nil {
+		c.err.SetSize(w, h)
+	}
+
 	c.embed.SetSize(w, h)
 }
 
@@ -92,7 +97,8 @@ func (me *Runner) handlePage(page sunbeam.Page) tea.Cmd {
 				embed.ResetSelection()
 			}
 
-			return nil
+			embed.SetSize(me.width, me.height)
+			return embed.Init()
 		}
 
 		embed := NewList(list.Items...)
@@ -143,9 +149,9 @@ func (me *Runner) handlePage(page sunbeam.Page) tea.Cmd {
 }
 
 func (me *Runner) handleAction(action sunbeam.ActionItem) tea.Cmd {
-	switch action.Type {
-	case sunbeam.ActionTypeCopy:
-		return func() tea.Msg {
+	return func() tea.Msg {
+		switch action.Type {
+		case sunbeam.ActionTypeCopy:
 			if err := clipboard.WriteAll(action.Copy.Text); err != nil {
 				return err
 			}
@@ -155,17 +161,12 @@ func (me *Runner) handleAction(action sunbeam.ActionItem) tea.Cmd {
 			}
 
 			return ShowNotificationMsg{"Copied!"}
-		}
-	case sunbeam.ActionTypeRun:
-		return func() tea.Msg {
+		case sunbeam.ActionTypeRun:
 			cmd := exec.Command(me.execPath, action.Run.Args...)
+			me.SetIsLoading(true)
 			output, err := cmd.Output()
 			if err != nil {
 				return err
-			}
-
-			if len(output) == 0 {
-				return ExitMsg{}
 			}
 
 			var action sunbeam.ActionItem
@@ -174,9 +175,16 @@ func (me *Runner) handleAction(action sunbeam.ActionItem) tea.Cmd {
 			}
 
 			return action
-		}
-	case sunbeam.ActionTypeOpen:
-		return func() tea.Msg {
+		case sunbeam.ActionTypeReload:
+			if action.Reload.Args != nil {
+				me.args = append(me.args, action.Reload.Args...)
+			}
+
+			return ReloadMsg{}
+		case sunbeam.ActionTypePush:
+			runner := NewRunner(me.execPath, action.Run.Args...)
+			return PushPageCmd(runner)
+		case sunbeam.ActionTypeOpen:
 			if action.Open.Url != "" {
 				if err := utils.Open(action.Open.Url); err != nil {
 					return err
@@ -192,17 +200,11 @@ func (me *Runner) handleAction(action sunbeam.ActionItem) tea.Cmd {
 			} else {
 				return fmt.Errorf("invalid target")
 			}
+		case sunbeam.ActionTypeExit:
+			return ExitMsg{}
+		default:
+			return nil
 		}
-	case sunbeam.ActionTypeExit:
-		return ExitCmd
-	case sunbeam.ActionTypeReload:
-		if action.Reload.Args != nil {
-			me.args = action.Reload.Args
-		}
-
-		return me.Run()
-	default:
-		return nil
 	}
 }
 
@@ -211,27 +213,38 @@ func (c *Runner) Update(msg tea.Msg) (Page, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
-			if c.embed != nil {
-				break
+			if c.err != nil {
+				c.err = nil
 			}
-			return c, PopPageCmd
 		}
 	case ReloadMsg:
 		return c, c.Run()
 	case sunbeam.ActionItem:
 		return c, c.handleAction(msg)
 	case error:
-		c.embed = NewErrorPage(msg)
-		c.embed.SetSize(c.width, c.height)
+		c.err = NewErrorPage(msg)
+		c.err.SetSize(c.width, c.height)
 		return c, c.embed.Init()
 	}
 
 	var cmd tea.Cmd
+	var cmds []tea.Cmd
 	c.embed, cmd = c.embed.Update(msg)
-	return c, cmd
+	cmds = append(cmds, cmd)
+
+	if c.err != nil {
+		c.err, cmd = c.err.Update(msg)
+		cmds = append(cmds, cmd)
+	}
+
+	return c, tea.Batch(cmds...)
 }
 
 func (c *Runner) View() string {
+	if c.err != nil {
+		return c.err.View()
+	}
+
 	return c.embed.View()
 }
 
@@ -264,31 +277,11 @@ func (c *Runner) Run() tea.Cmd {
 			return err
 		}
 
-		var payload struct {
-			Type string `json:"type"`
-		}
-
-		if err := json.Unmarshal(output, &payload); err != nil {
+		var page sunbeam.Page
+		if err := json.Unmarshal(output, &page); err != nil {
 			return err
 		}
 
-		switch payload.Type {
-		case "list", "detail", "form":
-			var page sunbeam.Page
-			if err := json.Unmarshal(output, &page); err != nil {
-				return err
-			}
-
-			return c.handlePage(page)
-		case "copy", "run", "open", "exit", "reload":
-			var action sunbeam.ActionItem
-			if err := json.Unmarshal(output, &action); err != nil {
-				return err
-			}
-
-			return c.handleAction(action)
-		default:
-			return fmt.Errorf("invalid payload type")
-		}
+		return c.handlePage(page)
 	})
 }

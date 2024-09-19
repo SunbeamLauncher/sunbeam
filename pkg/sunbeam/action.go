@@ -12,6 +12,7 @@ type ActionItem struct {
 
 	Copy   CopyAction   `json:"-"`
 	Run    RunAction    `json:"-"`
+	Push   PushAction   `json:"-"`
 	Open   OpenAction   `json:"-"`
 	Reload ReloadAction `json:"-"`
 }
@@ -53,8 +54,11 @@ type ReloadAction struct {
 }
 
 type RunAction struct {
-	Args   []string `json:"args,omitempty"`
-	Reload bool     `json:"reload,omitempty"`
+	Args []string `json:"args,omitempty"`
+}
+
+type PushAction struct {
+	Path string `json:"path,omitempty"`
 }
 
 type CopyAction struct {
@@ -74,5 +78,6 @@ const (
 	ActionTypeOpen   ActionType = "open"
 	ActionTypeCopy   ActionType = "copy"
 	ActionTypeExit   ActionType = "exit"
+	ActionTypePush   ActionType = "push"
 	ActionTypeReload ActionType = "reload"
 )
