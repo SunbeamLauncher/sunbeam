@@ -165,6 +165,10 @@ func (me *Runner) handleAction(action sunbeam.ActionItem) tea.Cmd {
 				return err
 			}
 
+			if len(output) == 0 {
+				return ExitMsg{}
+			}
+
 			var action sunbeam.ActionItem
 			if err := json.Unmarshal(output, &action); err != nil {
 				return err
