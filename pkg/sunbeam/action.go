@@ -1,14 +1,51 @@
 package sunbeam
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type ActionItem struct {
 	Title string     `json:"title,omitempty"`
 	Key   string     `json:"key,omitempty"`
 	Type  ActionType `json:"type,omitempty"`
 
-	Copy   CopyAction   `json:"copy,omitempty"`
-	Run    RunAction    `json:"run,omitempty"`
-	Open   OpenAction   `json:"open,omitempty"`
-	Reload ReloadAction `json:"reload,omitempty"`
+	Copy   CopyAction   `json:"-"`
+	Run    RunAction    `json:"-"`
+	Open   OpenAction   `json:"-"`
+	Reload ReloadAction `json:"-"`
+}
+
+func (a *ActionItem) UnmarshalJSON(data []byte) error {
+	var aux struct {
+		Type  ActionType `json:"type,omitempty"`
+		Title string     `json:"title,omitempty"`
+		Key   string     `json:"key,omitempty"`
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	a.Title = aux.Title
+	a.Type = aux.Type
+	a.Key = aux.Key
+
+	switch aux.Type {
+	case ActionTypeCopy:
+		return json.Unmarshal(data, &a.Copy)
+	case ActionTypeRun:
+		return json.Unmarshal(data, &a.Run)
+	case ActionTypeOpen:
+		return json.Unmarshal(data, &a.Open)
+	case ActionTypeReload:
+		return json.Unmarshal(data, &a.Reload)
+	case ActionTypeExit:
+		return nil
+	default:
+		return fmt.Errorf("unsupported page type: %s", aux.Type)
+	}
+
 }
 
 type ReloadAction struct {
