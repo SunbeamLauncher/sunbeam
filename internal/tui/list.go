@@ -32,7 +32,7 @@ type List struct {
 	isLoading  bool
 
 	focus         ListFocus
-	Actions       []sunbeam.Action
+	Actions       []sunbeam.ActionItem
 	OnQueryChange func(string) tea.Cmd
 	OnSelect      func(string) tea.Cmd
 }
@@ -118,7 +118,7 @@ func (c *List) updateViewport(detail sunbeam.ListItemDetail) {
 	c.viewport.SetContent(content)
 }
 
-func (l *List) SetActions(actions ...sunbeam.Action) {
+func (l *List) SetActions(actions ...sunbeam.ActionItem) {
 	l.Actions = actions
 	if l.filter.Selection() == nil {
 		l.statusBar.SetActions(actions...)

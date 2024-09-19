@@ -2,15 +2,12 @@ package tui
 
 import (
 	"fmt"
-	"os"
-	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/pomdtr/sunbeam/internal/extensions"
 	"github.com/pomdtr/sunbeam/pkg/sunbeam"
 )
 
@@ -20,92 +17,37 @@ type Form struct {
 	isLoading     bool
 	spinner       spinner.Model
 
-	submitMsg func(map[string]any) tea.Msg
+	submitMsg func(args []string) tea.Msg
 
 	scrollOffset int
 	focusIndex   int
 
-	inputs []Input
+	inputs []FormItem
 }
 
-func ExtractPreferencesFromEnv(alias string, extension extensions.Extension) (map[string]any, error) {
-	var preferences = make(map[string]any)
-	for _, input := range extension.Manifest.Preferences {
-		env := fmt.Sprintf("%s_%s", strings.ToUpper(alias), strings.ToUpper(input.Name))
-		env = strings.ReplaceAll(env, "-", "_")
-		if value, ok := os.LookupEnv(env); ok {
-			switch input.Type {
-			case sunbeam.InputString:
-				preferences[input.Name] = value
-			case sunbeam.InputBoolean:
-				value, err := strconv.ParseBool(value)
-				if err != nil {
-					continue
-				}
-
-				preferences[input.Name] = value
-			case sunbeam.InputNumber:
-				value, err := strconv.ParseInt(value, 10, 64)
-				if err != nil {
-					return nil, err
-				}
-
-				preferences[input.Name] = value
-			}
-			continue
-		}
-	}
-
-	return preferences, nil
-}
-
-func FindMissingPreferences(preferenceInputs []sunbeam.Input, values map[string]any) []sunbeam.Input {
-	preferenceParams := make(map[string]any)
-	for name, value := range values {
-		preferenceParams[name] = value
-	}
-
-	return FindMissingInputs(preferenceInputs, preferenceParams)
-}
-
-func FindMissingInputs(inputs []sunbeam.Input, params map[string]any) []sunbeam.Input {
-	missing := make([]sunbeam.Input, 0)
-	for _, input := range inputs {
-		param, ok := params[input.Name]
-		if !ok {
-			missing = append(missing, input)
-			continue
-		}
-
-		if param != nil {
-			continue
-		}
-
-		missing = append(missing, input)
-	}
-
-	return missing
-}
-
-func NewForm(submitMsg func(map[string]any) tea.Msg, params ...sunbeam.Input) *Form {
+func NewForm(submitMsg func(args []string) tea.Msg, inputs ...sunbeam.Input) *Form {
 	viewport := viewport.New(0, 0)
 
-	var inputs []Input
-	for _, param := range params {
-		switch param.Type {
-		case sunbeam.InputString:
-			inputs = append(inputs, NewTextField(param, false))
-		case sunbeam.InputBoolean:
-			inputs = append(inputs, NewCheckbox(param))
+	var items []FormItem
+	for _, input := range inputs {
+		switch input.Type {
+		case sunbeam.InputTextField:
+			items = append(items, NewTextField(input, false))
+		case sunbeam.InputPassword:
+			items = append(items, NewTextField(input, true))
+		case sunbeam.InputTextArea:
+			items = append(items, NewTextArea(input))
+		case sunbeam.InputCheckbox:
+			items = append(items, NewCheckbox(input))
 		case sunbeam.InputNumber:
-			inputs = append(inputs, NewNumberField(param))
+			items = append(items, NewNumberField(input))
 		}
 	}
 
 	form := &Form{
 		submitMsg: submitMsg,
 		viewport:  viewport,
-		inputs:    inputs,
+		inputs:    items,
 	}
 
 	return form
@@ -136,7 +78,7 @@ func (c *Form) Blur() tea.Cmd {
 	return nil
 }
 
-func (c *Form) CurrentItem() Input {
+func (c *Form) CurrentItem() FormItem {
 	if c.focusIndex >= len(c.inputs) {
 		return nil
 	}
@@ -216,11 +158,14 @@ func (c Form) Update(msg tea.Msg) (Page, tea.Cmd) {
 			return &c, tea.Batch(cmds...)
 		case "alt+enter":
 			return &c, func() tea.Msg {
-				values := make(map[string]any)
+				var args []string
 				for _, input := range c.inputs {
-					values[input.Name()] = input.Value()
+					flag := input.Flag()
+					if flag != "" {
+						args = append(args, flag)
+					}
 				}
-				return c.submitMsg(values)
+				return c.submitMsg(args)
 			}
 		}
 	}

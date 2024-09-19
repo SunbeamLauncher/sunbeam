@@ -5,34 +5,6 @@
         "$schema": {
             "type": "string"
         },
-        "oneliners": {
-            "type": "array",
-            "description": "A list of commands that will be shown in the root list",
-            "items": {
-                "type": "object",
-                "required": [
-                    "title",
-                    "command"
-                ],
-                "properties": {
-                    "title": {
-                        "type": "string"
-                    },
-                    "interactive": {
-                        "type": "boolean"
-                    },
-                    "command": {
-                        "type": "string"
-                    },
-                    "exit": {
-                        "type": "boolean"
-                    },
-                    "cwd": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "extensions": {
             "type": "object",
             "patternProperties": {

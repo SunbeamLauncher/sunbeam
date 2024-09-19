@@ -2,78 +2,10 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-        "emptyText": {
-            "type": "string"
-        },
-        "showDetail": {
-            "type": "boolean"
-        },
-        "actions": {
+        "inputs": {
             "type": "array",
             "items": {
-                "$ref": "./action.schema.json"
-            }
-        },
-        "items": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/item"
-            }
-        }
-    },
-    "definitions": {
-        "item": {
-            "required": [
-                "title"
-            ],
-            "properties": {
-                "title": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "subtitle": {
-                    "type": "string"
-                },
-                "detail": {
-                    "oneOf": [
-                        {
-                            "type": "object",
-                            "required": [
-                                "text"
-                            ],
-                            "properties": {
-                                "text": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        {
-                            "type": "object",
-                            "required": [
-                                "markdown"
-                            ],
-                            "properties": {
-                                "markdown": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    ]
-                },
-                "accessories": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "actions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "./action.schema.json"
-                    }
-                }
+                "$ref": "./item.schema.json"
             }
         }
     }

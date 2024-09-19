@@ -79,11 +79,3 @@ func ValidateDetail(input []byte) error {
 func ValidateList(input []byte) error {
 	return validateSchema("list.schema.json", input)
 }
-
-func ValidateManifest(input []byte) error {
-	return validateSchema("manifest.schema.json", input)
-}
-
-func ValidateConfig(input []byte) error {
-	return validateSchema("config.schema.json", input)
-}

@@ -23,8 +23,8 @@ type StatusBar struct {
 	notification string
 
 	cursor   int
-	actions  []sunbeam.Action
-	filtered []sunbeam.Action
+	actions  []sunbeam.ActionItem
+	filtered []sunbeam.ActionItem
 	expanded bool
 }
 
@@ -34,14 +34,14 @@ type ShowNotificationMsg struct {
 
 type HideNotificationMsg struct{}
 
-func NewStatusBar(actions ...sunbeam.Action) StatusBar {
+func NewStatusBar(actions ...sunbeam.ActionItem) StatusBar {
 	return StatusBar{
 		actions:  actions,
 		filtered: actions,
 	}
 }
 
-func (c *StatusBar) SetActions(actions ...sunbeam.Action) {
+func (c *StatusBar) SetActions(actions ...sunbeam.ActionItem) {
 	c.expanded = false
 	c.cursor = 0
 	c.actions = actions
@@ -54,7 +54,7 @@ func (c *StatusBar) FilterActions(query string) {
 		return
 	}
 
-	c.filtered = make([]sunbeam.Action, 0)
+	c.filtered = make([]sunbeam.ActionItem, 0)
 	for i := 0; i < len(c.actions); i++ {
 		if fzf.Score(c.actions[i].Title, query) > 0 {
 			c.filtered = append(c.filtered, c.actions[i])
@@ -154,22 +154,20 @@ func (c *StatusBar) Reset() {
 	c.filtered = c.actions
 }
 
-func ActionTitle(action sunbeam.Action) string {
+func ActionTitle(action sunbeam.ActionItem) string {
 	if action.Title != "" {
 		return action.Title
 	}
 
 	switch action.Type {
+	case sunbeam.ActionTypeReload:
+		return "Reload"
 	case sunbeam.ActionTypeRun:
 		return "Run"
 	case sunbeam.ActionTypeCopy:
 		return "Copy"
 	case sunbeam.ActionTypeOpen:
 		return "Open"
-	case sunbeam.ActionTypeEdit:
-		return "Edit"
-	case sunbeam.ActionTypeExec:
-		return "Exec"
 	case sunbeam.ActionTypeExit:
 		return "Exit"
 	default:

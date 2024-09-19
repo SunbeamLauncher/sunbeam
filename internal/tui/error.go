@@ -2,15 +2,12 @@ package tui
 
 import "github.com/pomdtr/sunbeam/pkg/sunbeam"
 
-func NewErrorPage(err error, additionalActions ...sunbeam.Action) *Detail {
-	var actions []sunbeam.Action
-	actions = append(actions, sunbeam.Action{
+func NewErrorPage(err error, additionalActions ...sunbeam.ActionItem) *Detail {
+	var actions []sunbeam.ActionItem
+	actions = append(actions, sunbeam.ActionItem{
 		Title: "Copy error",
 		Type:  sunbeam.ActionTypeCopy,
-		Copy: &sunbeam.CopyAction{
-			Text: err.Error(),
-			Exit: true,
-		},
+		Copy:  sunbeam.CopyAction{Text: err.Error(), Exit: true},
 	})
 	actions = append(actions, additionalActions...)
 

@@ -14,7 +14,7 @@ import (
 	"github.com/pomdtr/sunbeam/pkg/sunbeam"
 )
 
-type Input interface {
+type FormItem interface {
 	Name() string
 	Title() string
 	Value() any
@@ -23,10 +23,11 @@ type Input interface {
 	Blur()
 
 	Height() int
-
 	SetWidth(int)
-	Update(tea.Msg) (Input, tea.Cmd)
+
+	Update(tea.Msg) (FormItem, tea.Cmd)
 	View() string
+	Flag() string
 }
 
 type TextField struct {
@@ -83,7 +84,7 @@ func (ti *TextField) Value() any {
 	return ti.Model.Value()
 }
 
-func (ti *TextField) Update(msg tea.Msg) (Input, tea.Cmd) {
+func (ti *TextField) Update(msg tea.Msg) (FormItem, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -116,6 +117,10 @@ func (ti TextField) View() string {
 	return ti.Model.View()
 }
 
+func (ti TextField) Flag() string {
+	return fmt.Sprintf("--%s=%s", ti.Name(), ti.Value())
+}
+
 type TextArea struct {
 	textarea.Model
 	title string
@@ -130,7 +135,7 @@ func (ta *TextArea) Name() string {
 	return ta.name
 }
 
-func NewTextArea(input sunbeam.Input) Input {
+func NewTextArea(input sunbeam.Input) FormItem {
 	ta := textarea.New()
 	ta.Prompt = ""
 
@@ -150,6 +155,10 @@ func NewTextArea(input sunbeam.Input) Input {
 	}
 }
 
+func (ta *TextArea) Flag() string {
+	return fmt.Sprintf("--%s=%s", ta.Name(), ta.Value())
+}
+
 func (ta *TextArea) Height() int {
 	return ta.Model.Height()
 }
@@ -162,7 +171,7 @@ func (ta *TextArea) Value() any {
 	return ta.Model.Value()
 }
 
-func (ta *TextArea) Update(msg tea.Msg) (Input, tea.Cmd) {
+func (ta *TextArea) Update(msg tea.Msg) (FormItem, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -244,7 +253,7 @@ func (cb *Checkbox) SetWidth(width int) {
 	cb.width = width
 }
 
-func (cb Checkbox) Update(msg tea.Msg) (Input, tea.Cmd) {
+func (cb Checkbox) Update(msg tea.Msg) (FormItem, tea.Cmd) {
 	if !cb.focused {
 		return &cb, nil
 	}
@@ -258,6 +267,14 @@ func (cb Checkbox) Update(msg tea.Msg) (Input, tea.Cmd) {
 	}
 
 	return &cb, nil
+}
+
+func (cb Checkbox) Flag() string {
+	if cb.checked {
+		return fmt.Sprintf("--%s", cb.name)
+	}
+
+	return ""
 }
 
 func (cb Checkbox) View() string {
@@ -285,7 +302,7 @@ type NumberField struct {
 	*TextField
 }
 
-func NewNumberField(param sunbeam.Input) Input {
+func NewNumberField(param sunbeam.Input) FormItem {
 	if param.Default != nil {
 		if _, ok := param.Default.(int); ok {
 			param.Default = strconv.Itoa(param.Default.(int))
@@ -306,7 +323,7 @@ func (n NumberField) Value() any {
 	return value
 }
 
-func (n NumberField) Update(msg tea.Msg) (Input, tea.Cmd) {
+func (n NumberField) Update(msg tea.Msg) (FormItem, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {

@@ -46,23 +46,11 @@ func AnsiStyle() ansi.StyleConfig {
 	return style
 }
 
-func NewDetail(text string, actions ...sunbeam.Action) *Detail {
+func NewDetail(text string, actions ...sunbeam.ActionItem) *Detail {
 	viewport := viewport.New(0, 0)
 	viewport.Style = lipgloss.NewStyle()
 
 	statusBar := NewStatusBar(actions...)
-	items := make([]FilterItem, 0)
-	for _, action := range actions {
-		items = append(items, ListItem{
-			Title:    action.Title,
-			Subtitle: action.Key,
-			Actions:  []sunbeam.Action{action},
-		})
-	}
-
-	filter := NewFilter(items...)
-	filter.DrawLines = true
-
 	input := textinput.New()
 	input.PlaceholderStyle = lipgloss.NewStyle().Faint(true)
 	input.Prompt = ""
