@@ -156,11 +156,7 @@ func (me *Runner) handleAction(action sunbeam.ActionItem) tea.Cmd {
 				return err
 			}
 
-			if action.Copy.Exit {
-				return ExitMsg{}
-			}
-
-			return ShowNotificationMsg{"Copied!"}
+			return ExitMsg{}
 		case sunbeam.ActionTypeRun:
 			cmd := exec.Command(me.execPath, action.Run.Args...)
 			me.SetIsLoading(true)
@@ -173,6 +169,7 @@ func (me *Runner) handleAction(action sunbeam.ActionItem) tea.Cmd {
 			if err := json.Unmarshal(output, &action); err != nil {
 				return err
 			}
+			me.SetIsLoading(false)
 
 			return action
 		case sunbeam.ActionTypeReload:

@@ -65,7 +65,6 @@ type PushAction struct {
 
 type CopyAction struct {
 	Text string `json:"text,omitempty"`
-	Exit bool   `json:"exit,omitempty"`
 }
 
 type OpenAction struct {
