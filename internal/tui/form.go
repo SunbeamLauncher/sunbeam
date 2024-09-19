@@ -225,7 +225,7 @@ func (c Form) updateInputs(msg tea.Msg) tea.Cmd {
 
 func (c *Form) SetSize(width, height int) {
 	c.width, c.height = width, height
-	c.viewport.Height = max(0, height-2)
+	c.viewport.Height = max(0, height-4)
 	for _, input := range c.inputs {
 		input.SetWidth(width / 2)
 	}
@@ -240,7 +240,14 @@ func (c *Form) SetSize(width, height int) {
 }
 
 func (c *Form) View() string {
+	var headerRow string
+	if c.isLoading {
+		headerRow = fmt.Sprintf(" %s", c.spinner.View())
+	} else {
+		headerRow = "  "
+	}
+
 	separator := strings.Repeat("─", c.width)
 	submitRow := lipgloss.NewStyle().Align(lipgloss.Right).Padding(0, 1).Width(c.width).Render(fmt.Sprintf("%s · %s", renderAction("Submit", "alt+enter", false), renderAction("Focus Next", "tab", false)))
-	return lipgloss.JoinVertical(lipgloss.Left, c.viewport.View(), separator, submitRow)
+	return lipgloss.JoinVertical(lipgloss.Left, headerRow, separator, c.viewport.View(), separator, submitRow)
 }
